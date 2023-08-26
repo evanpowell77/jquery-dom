@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movies App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movies App</h1>
+    <form id="movie-form">
+        <label for="title">Movie Title:</label>
+        <input type="text" id="title" required minlength="2">
+        <label for="rating">Rating (0-10):</label>
+        <input type="number" id="rating" required min="0" max="10">
+        <button type="submit">Add Movie</button>
+    </form>
+    <div>
+        <label>Sort by:</label>
+        <select id="sort-select">
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="title-desc">Title (Z-A)</option>
+            <option value="rating-asc">Rating (Low to High)</option>
+            <option value="rating-desc">Rating (High to Low)</option>
+        </select>
+    </div>
+    <ul id="movie-list"></ul>
+
+    <script>
+        $(document).ready(function() {
+            $('#movie-form').submit(function(event) {
+                event.preventDefault();
+                const title = $('#title').val();
+                const rating = $('#rating').val();
+
+                if (title.length < 2) {
+                    alert('Title must have at least 2 characters.');
+                    return;
+                }
+
+                const listItem = $('<li>').text(`${title} - Rating: ${rating}`);
+                const removeButton = $('<button>').text('Remove').click(function() {
+                    listItem.remove();
+                });
+
+                listItem.append(removeButton);
+                $('#movie-list').append(listItem);
+
+                $('#title').val('');
+                $('#rating').val('');
+            });
+
+            $('#sort-select').change(function() {
+                const selectedOption = $(this).val();
+                const movieList = $('#movie-list');
+                const movies = movieList.children('li').get();
+
+                movies.sort(function(a, b) {
+                    const aText = $(a).text().toUpperCase();
+                    const bText = $(b).text().toUpperCase();
+                    if (selectedOption === 'title-asc' || selectedOption === 'title-desc') {
+                        return (aText < bText) ? -1 : (aText > bText) ? 1 : 0;
+                    } else {
+                        const aRating = parseFloat(aText.match(/Rating: ([0-9.]+)/)[1]);
+                        const bRating = parseFloat(bText.match(/Rating: ([0-9.]+)/)[1]);
+                        return (selectedOption === 'rating-asc') ? aRating - bRating : bRating - aRating;
+                    }
+                });
+
+                $.each(movies, function(index, movie) {
+                    movieList.append(movie);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
